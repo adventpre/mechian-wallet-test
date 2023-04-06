@@ -1,0 +1,90 @@
+#!/bin/bash
+set -e
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+launchContainers(){
+  printf "${GREEN}*** Docker Compose Build ***${NC}\n"
+  docker-compose build --build-arg NPM_TOKEN=${NPM_TOKEN}
+
+  printf "${GREEN}*** Launching containerized ganache ***${NC}\n"
+  docker-compose up -d ganache
+
+  printf "${GREEN}*** Deploying all contracts ***${NC}\n"
+  docker-compose run --rm truffle-offchain migrate --reset --network=default
+  docker-compose run --rm truffle-zkp migrate --reset --network=default
+  docker-compose run --rm truffle-nightlite migrate --reset --network=default
+
+  printf "${GREEN}*** Launching independent containers ***${NC}\n"
+  # these container take time to setup
+  # starting them first to avoid ECONNREFUSED error
+  # as other containers depends on them
+  docker-compose up -d rabbitmq
+  docker-compose up -d mongo-merkle-tree
+  docker-compose up -d mongo-nightfall
+
+  while ! docker-compose exec mongo-nightfall mongo nightfall --host=localhost -u admin -p admin is-mongo-ready.js; do
+    sleep 3
+  done
+
+  printf "${GREEN}*** Launching containerized microservices ***${NC}\n"
+  docker-compose up
+}
+
+cleanup(){
+  printf "${GREEN}*** Cleaning up all containers ***${NC}\n"
+  docker-compose down -v || {
+    # this block will run if ```docker-compose down -v``` fails.
+    sleep 3
+
+    printf "${GREEN}*** Remove nightfall network ***${NC}\n"
+    docker network rm nightfall_network
+
+    printf "${GREEN}*** Remove nightfall's mongo volume ***${NC}\n"
+    docker volume rm nightfall_mongo-nightfall-volume
+
+    printf "${GREEN}*** Remove zkp-code volume ***${NC}\n"
+    docker volume rm nightfall_zkp-code-volume
+
+    printf "${GREEN}*** Remove merkle_tree network ***${NC}\n"
+    docker network rm merkle_tree_network
+
+    printf "${GREEN}*** Remove the merkle tree's mongo volume ***${NC}\n"
+    docker volume rm nightfall_mongo-merkle-tree-volume
+  }
+
+  printf  "${GREEN}*** Delete files created by previous run ***${NC}\n"
+  rm -dr zkp/build/ || true
+  rm -dr offchain/build/ || true
+  rm zkp/contracts/MerkleTree.sol || true
+  rm docker-compose.override.yml || true
+}
+
+cleanup
+
+if [[ -z "$NPM_TOKEN" ]]; then
+  printf "${RED}*** ENV variable NPM_TOKEN is not set ***${NC}\n"
+  printf "Please set a valid (permission required :repo and :read-packages) github personal access token to the ENV - 'NPM_TOKEN'\n"
+  exit 1
+fi
+
+printf "${GREEN}*** Pull zokrates docker image ***${NC}\n"
+docker pull zokrates/zokrates:0.5.1
+
+printf "${GREEN}*** Installing zkp dependencies ***${NC}\n"
+pushd zkp
+npm i
+popd
+
+if [[ "$1" == "compliance" || "$1" == "mimc" ]]
+then
+  cp docker-compose.override.$1.yml docker-compose.override.yml
+  launchContainers
+
+else
+  launchContainers
+fi
+
+cleanup
