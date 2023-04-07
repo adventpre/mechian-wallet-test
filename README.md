@@ -14,23 +14,11 @@ motivated to contribute their own ideas and improvements.
 that you do not use it in production or to transfer items of material value. We take no
 responsibility for any loss you may incur through the use of this code.**
 
-As well as this file, please be sure to check out:
-
-- [The Whitepaper](./doc/whitepaper/nightfall-v1.pdf) for technical details on the protocols and
-  their application herein.
-- [contributions.md](./contributing.md) to find out how to contribute code.
-- [limitations.md](./limitations.md) to understand the limitations of the current code.
-- [license.md](./license.md) to understand how we have placed this code completely in the public
-  domain, without restrictions (but note that Nightfall makes use of other open source code which
-  _does_ apply licence conditions).
-- [UI.md](./UI.md) to learn how to drive the demonstration UI and make transactions.
-- [SECURITY.md](./SECURITY.md) to learn about how we handle security issues.
 
 ## Security updates
 
 Critical security updates will be listed
-[here](https://github.com/EYBlockchain/nightfall/security/advisories/GHSA-36j7-5gjq-gq3w). If you
-had previously installed Nightfall prior to one of these security updates, please pull the latest
+[here] If you had previously installed Nightfall prior to one of these security updates, please pull the latest
 code, and follow the extra re-installation steps.
 
 ## Getting started
@@ -39,18 +27,18 @@ These instructions give the most direct path to a working Nightfall setup. The a
 compute-intensive and so a high-end processor is preferred. Depending on your machine, setup can
 take one to several hours.
 
-### Installing Nightfall
+### Installing Mechian-wallet
 
-Clone the Nightfall repository:
+Clone the Mechian-wallet repository:
 
 ```sh
-git clone git@github.com:EYBlockchain/nightfall.git
+git clone https://github.com/mechainlab/mechian-wallet.git
 ```
 
 or:
 
 ```sh
-git clone https://github.com/EYBlockchain/nightfall.git
+git clone https://github.com/mechainlab/mechian-wallet.git
 ```
 
 Enter the directory:
@@ -135,23 +123,23 @@ For details, see the [zkp readme](zkp/README.md). The compliance version require
 selected the correct trusted setup when you ran
 
 ```sh
-./nightfall-generate-trusted-setup
+./mechian-wallet-generate-trusted-setup
 ```
 
 After that, you can start it with
 
 ```sh
-./nightfall compliance
+./mechian-wallet compliance
 ```
 
-Nightfall will inject test keys into the underlying Nightfall library, warning you that it has done
+Mechian-wallet will inject test keys into the underlying Nightfall library, warning you that it has done
 so. To log in as a compliance administrator, use username `admin`, password `admin`. This is only
 for demonstration of course. You should use an appropriate access control system for any other
 purpose.
 
 ## Using other ERC-20 and ERC-721 contracts
 
-Nightfall will operate with any ERC-20 and ERC-721 compliant contract. The contracts' addresses are
+Mechian-wallet will operate with any ERC-20 and ERC-721 compliant contract. The contracts' addresses are
 fed into FTokenShield.sol and NFTokenShield.sol respectively during the Truffle migration and cannot
 be changed subsequently.
 
@@ -178,7 +166,7 @@ Ganache one we provide.
 
 ## Acknowledgements
 
-Team Mechain thanks those who have indirectly contributed to it, with the ideas and tools that
+Team Mechian-wallet thanks those who have indirectly contributed to it, with the ideas and tools that
 they have shared with the community:
 
 - [ZoKrates](https://hub.docker.com/r/michaelconnor/zok)
